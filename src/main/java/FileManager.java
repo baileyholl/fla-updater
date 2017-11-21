@@ -27,11 +27,10 @@ public class FileManager {
             }
         }
 
-
         List<File> list = Arrays.asList((Constants.programFolder.listFiles()));
         for (File f : list) {
             if (f.toPath().toString().contains(".jar")) {
-                Constants.jarPath = f.toString();
+                Constants.jarPath = f;
                 break;
             }
         }
