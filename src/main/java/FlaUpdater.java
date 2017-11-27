@@ -1,3 +1,8 @@
+import javafx.application.Application;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.stage.Stage;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -10,7 +15,7 @@ import java.util.List;
  * Update wrapper for the Fabrication Lab Anayltics tool.
  *
  */
-public class FlaUpdater {
+public class FlaUpdater extends Application{
     /*
      * Currently, this file must contain the file version on the first line and a direct download link on the second.
      * Ex:
@@ -20,13 +25,7 @@ public class FlaUpdater {
     public static String versionCheckFile = "https://raw.githubusercontent.com/baileyholl/fla-updater/master/version-file";
 
     public static void main(String[] args){
-        try {
-            FileManager.setupFolders();
-            FlaUpdater flaUpdater = new FlaUpdater();
-            flaUpdater.loadVersion();
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+        launch(args);
     }
 
     public void loadVersion(){
@@ -39,13 +38,12 @@ public class FlaUpdater {
                         new URL[]{new File(Constants.jarPath.toPath().toString()).toURI().toURL()},
                         getClass().getClassLoader()
                 );
-                //ClassLoader loader = urlClassLoader;
                 //Load the Main class from the default package
                 Class<?> clazz = Class.forName("Main", true, urlClassLoader);
                 //Get and call the public static method getVersion
                 Method getVersion = clazz.getMethod("getVersion");
                 version = new Version((String) getVersion.invoke(null));
-                System.out.println(version);
+                System.out.println("Local jar version: " + version);
                 urlClassLoader.close();
             }catch(Exception e){
                 e.printStackTrace();
@@ -55,10 +53,23 @@ public class FlaUpdater {
         ThreadVersionChecker threadVersionChecker = new ThreadVersionChecker(versionCheckFile, version);
         threadVersionChecker.run();
     }
+
     public static void launchJar(String jarPath){
         try {
-            Process proc = Runtime.getRuntime().exec("java -jar " + jarPath.trim());
+            Runtime.getRuntime().exec("java -jar " + jarPath.trim());
         } catch (IOException e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Failure launching jar file! Contact developer! \n" + e.getMessage(), ButtonType.OK);
+        }
+    }
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        try {
+            FileManager.setupFolders();
+            FlaUpdater flaUpdater = new FlaUpdater();
+            flaUpdater.loadVersion();
+        }catch (Exception e){
             e.printStackTrace();
         }
     }

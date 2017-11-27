@@ -1,7 +1,7 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStreamReader;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+
+import java.io.*;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -11,6 +11,7 @@ import java.util.Arrays;
 public class ThreadVersionChecker extends Thread{
     private String infoURL = "";
     private Version localVersion = null;
+
     public ThreadVersionChecker(String url, Version version) {
         setName("FLA Version Checker");
         this.infoURL = url;
@@ -25,9 +26,11 @@ public class ThreadVersionChecker extends Thread{
             BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream()));
             Version latestVersion = new Version(r.readLine().trim());
             URL website = new URL(r.readLine());
-            System.out.println("Latest version: " + latestVersion);
+            System.out.println("Latest version found: " + latestVersion);
             if(localVersion == null || latestVersion.compareTo(localVersion) > 0 && !latestVersion.equals(localVersion)) {
                 System.out.println("Version out of date or jar missing. Beginning Download");
+                Alert versionUpdate = new Alert(Alert.AlertType.INFORMATION,"Updating to the latest iHub analytics version! :)", ButtonType.OK);
+                versionUpdate.show();
                 ReadableByteChannel rbc = Channels.newChannel(website.openStream());
                 String jarPath = "\\FLA-" + latestVersion.get() + ".jar";
                 FileOutputStream fos = new FileOutputStream(Constants.programFolder + jarPath);
@@ -38,21 +41,21 @@ public class ThreadVersionChecker extends Thread{
                 if(Constants.jarPath != null){
                     System.out.println("attempting delete of file at path: " + Constants.jarPath.toPath().toString());
                     if(Constants.programFolder.listFiles() != null && Arrays.asList((Constants.programFolder.listFiles())).size() > 1) {
-                        if (Files.deleteIfExists(Constants.jarPath.toPath())) {
-                            System.out.println("Old version deleted");
-                        } else {
-                            System.out.println("Failed to delete.");
-                        }
+                        System.out.println(Files.deleteIfExists(Constants.jarPath.toPath()) ? "Old version deleted" : "Failed to delete.");
                     }else {
                         System.out.println("Improper versioning detected!");
+                        Alert improperVersionAlert = new Alert(Alert.AlertType.ERROR,"Improper versioning detected with online version file. Contact developer!", ButtonType.OK);
+                        improperVersionAlert.showAndWait();
                     }
                 }
                 Constants.jarPath = new File(Constants.programFolder.toString() + jarPath);
             }
-            FlaUpdater.launchJar(Constants.jarPath.toPath().toString());
-        } catch(Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
-
+            Alert urlAlert = new Alert(Alert.AlertType.ERROR,"IO Exception Encountered! Contact developer! Attempting to launch old version. :( \n" + e.getMessage(), ButtonType.OK);
+            urlAlert.showAndWait();
         }
+        FlaUpdater.launchJar(Constants.jarPath.toPath().toString());
     }
+
 }

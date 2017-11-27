@@ -1,4 +1,6 @@
 import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 
 import java.io.File;
 import java.util.Arrays;
@@ -8,6 +10,7 @@ public class FileManager {
     private static String OSProgramPath;
 
     public static void setupFolders() {
+        Alert folderAlert = new Alert(Alert.AlertType.ERROR, "Error setting up folders! Contact the developer :(", ButtonType.OK);
         System.out.println("Searching for resource folder");
         Constants.mainFolder = new File(getFilePath());
         Constants.programFolder = new File(Constants.mainFolder.toString() + OSProgramPath);
@@ -16,6 +19,7 @@ public class FileManager {
             System.out.println("Making main folder");
             if(!Constants.mainFolder.mkdir()){
                 System.out.println("Failed creating main folder");
+                folderAlert.showAndWait();
                 System.exit(1);
             }
         }
@@ -23,6 +27,7 @@ public class FileManager {
             System.out.println("Making program folder");
             if(!Constants.programFolder.mkdir()){
                 System.out.println("Failed making program folder");
+                folderAlert.showAndWait();
                 System.exit(1);
             }
         }
