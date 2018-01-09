@@ -36,6 +36,7 @@ public class FileManager {
         for (File f : list) {
             if (f.toPath().toString().contains(".jar")) {
                 Constants.jarPath = f;
+                System.out.println("new jar path: " + Constants.jarPath);
                 break;
             }
         }
